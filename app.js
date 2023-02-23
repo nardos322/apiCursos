@@ -1,11 +1,11 @@
 import express from 'express';
-import { routerCursos } from './routers/routerCursos.js';
+import { adminCursosRouter } from './routers/adminCursosRouter.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 
 // routers
-app.use('/api/cursos', routerCursos);
+app.use('/api/admin/cursos', adminCursosRouter);
 
 
 // routing
