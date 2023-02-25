@@ -1,6 +1,8 @@
 import { cursoDe, idIsRepeat, searchForName } from '../functions/functions.js';
+import { getAllCursos } from '../database/database.js';
 import { createRequire } from 'module';
 import { writeFile, writeFileSync } from 'fs';
+import { pool } from '../database/database.js';
 const require = createRequire(import.meta.url);
 const infoCurso = require('../database/cursos.json');
 
@@ -9,15 +11,25 @@ const infoCurso = require('../database/cursos.json');
 
 export const adminCursosController = {
 
-  getListDisiplinas: (req, res) => {
-    let nameSearch = req.query.name
-    return res.json(infoCurso);
-  },
-  getListDisiplinasCursos: (req, res) => {
-    let disiplinaCursos = req.params.disiplinaCursos;
+  getListDisiplinas: async (req, res) => {
+    // let matematicas = await pool.query('SELECT * FROM matematicas');
+    // let programacion = await pool.query('SELECT * FROM programacion');
+    // let allCursos = {matematicas: matematicas[0], programacion: programacion[0]}
+    // return res.json(allCursos);
+    let allCursos = await pool.query(`SELECT *  FROM matematicas
+      UNION SELECT * FROM programacion`)
+      return res.json(allCursos[0])
 
-    if (infoCurso.hasOwnProperty(disiplinaCursos)) {
-      return res.json(infoCurso[disiplinaCursos]);
+    // let tables = await pool.query('SHOW TABLES')
+    // return res.json(tables[0].length)
+
+  },
+  getListDisiplinasCursos: async (req, res) => {
+    let disiplinaCursos = req.params.disiplinaCursos;
+    let allCursos = await getAllCursos();
+
+    if (allCursos.hasOwnProperty(disiplinaCursos)) {
+      return res.json(allCursos[disiplinaCursos]);
     } else {
       return res.status(404).send('No se encontraron cursos para esa disiplina');
     }
@@ -25,17 +37,17 @@ export const adminCursosController = {
 
   },
 
-  getOneCurso: (req, res) => {
+  getOneCurso: async (req, res) => {
     let disiplina = req.params.disiplina;
     let id = req.params.id;
-
+    let allCursos = await getAllCursos();
   
-    if (!infoCurso.hasOwnProperty(disiplina)) {
+    if (!allCursos.hasOwnProperty(disiplina)) {
 
       return res.send(`no se encontraron coincidencias para ${disiplina}`);
     };
 
-    let result = infoCurso[disiplina].filter(curso => curso.id == id)
+    let result = allCursos[disiplina].filter(curso => curso.id == id)
 
     if (result.length > 0){
       return res.json(result[0]);
@@ -45,20 +57,21 @@ export const adminCursosController = {
 
 
   },
-  getListCurso: (req, res) => {
+  getListCurso: async (req, res) => {
     let curso = req.params.curso;
     let disiplina = req.params.disiplina;
     let nivel = req.params.nivel;
+    let allCursos = await getAllCursos();
     let results;
 
 
-    if (!infoCurso.hasOwnProperty(disiplina)) {
+    if (!allCursos.hasOwnProperty(disiplina)) {
 
       return res.send(`no se encontraron coincidencias para ${disiplina}`);
     };
 
     if (nivel) {
-      results = infoCurso[disiplina].filter(nameCurso => {
+      results = allCursos[disiplina].filter(nameCurso => {
 
         if (nameCurso.hasOwnProperty('lenguaje')) {
           return nameCurso.lenguaje == curso && nameCurso.nivel == nivel;
@@ -68,7 +81,7 @@ export const adminCursosController = {
 
       });
     } else {
-      results = infoCurso[disiplina].filter(nameCurso => {
+      results = allCursos[disiplina].filter(nameCurso => {
 
         if (nameCurso.hasOwnProperty('lenguaje')) {
           return nameCurso.lenguaje == curso;
@@ -96,32 +109,24 @@ export const adminCursosController = {
     return res.json(results);
   },
 
-  postAddCurso: (req, res) => {
+  postAddCurso: async (req, res) => {
     let disiplina = req.params.disiplina;
     let cursoNuevo = req.body;
+    let allCursos = await getAllCursos();
 
-    if (!infoCurso.hasOwnProperty(disiplina)) {
+ 
+
+    if (!allCursos.hasOwnProperty(disiplina)) {
 
       return res.status(404).send('no se puede agregar cursos para esta disiplina');
-    } else if (infoCurso.hasOwnProperty(disiplina)) {
-      if (cursoDe(cursoNuevo).disiplina == 'matematicas' && disiplina == 'matematicas' && !idIsRepeat(infoCurso[disiplina], cursoNuevo.id)) {
+    } else if (allCursos.hasOwnProperty(disiplina)) {
+      if (cursoDe(cursoNuevo).disiplina == `${disiplina}` && !idIsRepeat(allCursos[disiplina], cursoNuevo.id)) {
 
-        infoCurso.matematicas.push(cursoNuevo);
-
-        writeFile('./database/cursos.json', JSON.stringify(infoCurso), err => {
-          if (err) throw err;
-
-          return res.json(infoCurso);
-        });
-      } else if (cursoDe(cursoNuevo).disiplina == 'programacion' && disiplina == 'programacion' && !idIsRepeat(infoCurso[disiplina], cursoNuevo.id)) {
-        console.log(idIsRepeat(infoCurso[disiplina], cursoNuevo.id))
-        infoCurso.programacion.push(cursoNuevo);
-
-        writeFile('./database/cursos.json', JSON.stringify(infoCurso), err => {
-          if (err) throw err;
-
-          return res.json(infoCurso);
-        });
+        pool.query(`INSERT INTO ${disiplina} (titulo,${cursoDe(cursoNuevo).disiplina == 'matematicas'? 'tema': 'lenguaje'},vistas, nivel) VALUES 
+        ('${req.body.titulo}', '${cursoDe(cursoNuevo).disiplina == 'matematicas'? req.body.tema: req.body.lenguaje}', '${req.body.vistas}', '${req.body.nivel}')`);
+        allCursos = await getAllCursos()
+        return res.json(allCursos[disiplina]);
+      
       } else {
         return res.status(404).send('el curso que sea agregar no coincide con la disiplina o tiene un id repetido');
       }
@@ -201,7 +206,7 @@ export const adminCursosController = {
 
       return res.json(searchForName(infoCurso, nameSearch))
     } else {
-      return res.status(404).send('no se encontraron cursos con ese nombre')
+      return res.status(404).send('no se encontraron cursos con ese nombre');
     }
   }
 }

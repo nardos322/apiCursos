@@ -2,11 +2,11 @@ POST http://localhost:3000/api/admin/cursos/programacion HTTP/1.1
 Content-Type: application/json
 
 {
-    "id": 11,
-    "titulo": "Aprende C++ con proyectos",
-    "lenguaje": "C++",
+    "id": 5,
+    "titulo": "Aprende C ",
+    "lenguaje": "c++",
     "vistas": 1250540,
-    "nivel": "intermedio"
+    "nivel": "basico"
 }
 
 ###
@@ -15,11 +15,11 @@ POST http://localhost:3000/api/admin/cursos/matematicas HTTP/1.1
 Content-Type: application/json
 
 {
-    "id": 11,
-    "titulo": "Aprende fisica",
-    "tema": "fisica",
+    "id": 9,
+    "titulo": "Aprende probalidad",
+    "tema": "probabilidad",
     "vistas": 1521401,
-    "nivel": "basico"
+    "nivel": "avanzado"
 }
 
 ###
