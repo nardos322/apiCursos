@@ -2,7 +2,7 @@ import express from 'express';
 import { adminCursosController } from '../controllers/adminCursosController.js';
 const adminCursosRouter = express.Router();
 
-adminCursosRouter.use(express.json());
+
 
 
 adminCursosRouter.get('/', adminCursosController.getListDisiplinas);
@@ -18,6 +18,8 @@ adminCursosRouter.get('/:disiplina/:curso/:nivel?', adminCursosController.getLis
 adminCursosRouter.post('/:disiplina', adminCursosController.postAddCurso);
 
 adminCursosRouter.put('/:disiplina/:id', adminCursosController.putUpdateCurso);
+
+adminCursosRouter.patch('/:disiplina/:id', adminCursosController.patchCurso);
 
 adminCursosRouter.delete('/:disiplina/:id', adminCursosController.deleteCurso);
 

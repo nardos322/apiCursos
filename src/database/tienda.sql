@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXIST tiendadb;
+CREATE DATABASE IF NOT EXIST cursos_db;
 
 CREATE TABLE programacion (
 	id INT PRIMARY KEY auto_increment,

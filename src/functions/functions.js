@@ -24,10 +24,13 @@ export const cursoDe = (curso) => {
     
 };
 
-export const searchForName = (infoCurso, nameSearch) => {
-    let allCursos = [...infoCurso.programacion, ...infoCurso.matematicas];
+export const searchForName = (allCursos, nameSearch) => {
+    
     let results = []
+    console.log(nameSearch)
+    console.log(allCursos[1].titulo.toLowerCase().includes(nameSearch))
     for(let i = 0; i < allCursos.length; i++){
+       
         if(allCursos[i].titulo.toLowerCase().includes(nameSearch)){
            results.push(allCursos[i]);
            
