@@ -1,5 +1,3 @@
-
-
 export const idIsRepeat = (listCursos, newId) => {
     
     for(let i = 0; i < listCursos.length; i++) {
@@ -27,7 +25,6 @@ export const cursoDe = (curso) => {
 export const searchForName = (allCursos, nameSearch) => {
     
     let results = []
-    console.log(nameSearch)
     console.log(allCursos[1].titulo.toLowerCase().includes(nameSearch))
     for(let i = 0; i < allCursos.length; i++){
        

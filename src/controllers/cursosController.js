@@ -1,18 +1,23 @@
 import { cursoDe, idIsRepeat, searchForName } from '../functions/functions.js';
-import { getAllCursos } from '../database/database.js';
-import { createRequire } from 'module';
+import { getAllCursos, patchCurso, postCurso, putCurso } from '../database/database.js';
 import { pool } from '../database/database.js';
-const require = createRequire(import.meta.url);
+const getUrl = (req) => req.protocol + "://" + req.get("host") + req.originalUrl;
 
 
 
-export const adminCursosController = {
+export const cursosController = {
 
 
   getListDisiplinas: async (req, res) => {
-   
+
     let allCursos = await getAllCursos();
-      return res.json(allCursos);
+    return res.json({
+      meta: {
+        endPoint: getUrl(req),
+        total: allCursos.length,
+      },
+      data: allCursos,
+    });
 
   },
   getListDisiplinasCursos: async (req, res) => {
@@ -20,9 +25,20 @@ export const adminCursosController = {
     let allCursos = await getAllCursos();
 
     if (allCursos.hasOwnProperty(disiplinaCursos)) {
-      return res.json(allCursos[disiplinaCursos]);
+      return res.json({
+        meta: {
+          endPoint: getUrl(req),
+          total: allCursos[disiplinaCursos].length
+        },
+        data: allCursos[disiplinaCursos],
+      });
     } else {
-      return res.status(404).send('No se encontraron cursos para esa disiplina');
+      return res.status(404).json({
+        meta: {
+          status: 404,
+          message: 'Not found',
+        }
+      });
     }
 
 
@@ -32,7 +48,7 @@ export const adminCursosController = {
     let disiplina = req.params.disiplina;
     let id = req.params.id;
     let allCursos = await getAllCursos();
-  
+
     if (!allCursos.hasOwnProperty(disiplina)) {
 
       return res.send(`no se encontraron coincidencias para ${disiplina}`);
@@ -40,10 +56,21 @@ export const adminCursosController = {
 
     let result = allCursos[disiplina].filter(curso => curso.id == id);
 
-    if (result.length > 0){
-      return res.json(result[0]);
-    }else{
-      return res.status(404).send(`no se encontraron cursos en ${disiplina} con el id: ${id}`);
+    if (result.length > 0) {
+      return res.json({
+        meta: {
+          endPoint: getUrl(req),
+          total: result[0].length,
+        },
+        data: result[0],
+      });
+    } else {
+      return res.status(404).json({
+        meta: {
+          status: 404,
+          message: `no se encontraron cursos en ${disiplina} con el id: ${id}`
+        }
+      });
     }
 
 
@@ -58,7 +85,12 @@ export const adminCursosController = {
 
     if (!allCursos.hasOwnProperty(disiplina)) {
 
-      return res.send(`no se encontraron coincidencias para ${disiplina}`);
+      return res.status(404).json({
+        meta: {
+          status: 404,
+          message: `no se encontraron coincidencias para ${disiplina}`,
+        },
+      });
     };
 
     if (nivel) {
@@ -75,6 +107,7 @@ export const adminCursosController = {
       results = allCursos[disiplina].filter(nameCurso => {
 
         if (nameCurso.hasOwnProperty('lenguaje')) {
+
           return nameCurso.lenguaje == curso;
         } else if (nameCurso.hasOwnProperty('tema')) {
           return nameCurso.tema == curso;
@@ -84,20 +117,42 @@ export const adminCursosController = {
     }
 
     if (results.length == 0 && nivel) {
-      return res.status(404).send(`No se encontraron cursos de ${curso} y "${nivel}"`);
+      return res.status(404).json({
+        meta: {
+          status: 404,
+          message: `No se encontraron cursos de ${curso} y "${nivel}"`,
+        }
+      });
 
     } else if (results.length == 0) {
       console.log('hola')
-      return res.status(404).send(`en la disiplina ${disiplina} no se encontraron cursos de ${curso}`);
+      return res.status(404).json({
+        meta: {
+          status: 404,
+          message: `en la disiplina ${disiplina} no se encontraron cursos de ${curso}`,
+        },
+      });
 
     };
 
     if (req.query.ordenar === 'vistas') {
-      
-      return res.json(results.sort((a, b) => b.vistas - a.vistas));
+
+      return res.json({
+        meta: {
+          endPoint: getUrl(req),
+          total: results.sort((a, b) => b.vistas - a.vistas).length
+        },
+        data: results.sort((a, b) => b.vistas - a.vistas)
+      });
     }
 
-    return res.json(results);
+    return res.json({
+      meta: {
+        endPoint: getUrl(req),
+        total: results.length,
+      },
+      data: results,
+    });
   },
 
   postAddCurso: async (req, res) => {
@@ -105,21 +160,31 @@ export const adminCursosController = {
     let cursoNuevo = req.body;
     let allCursos = await getAllCursos();
 
- 
+
 
     if (!allCursos.hasOwnProperty(disiplina)) {
 
       return res.status(404).send('no se puede agregar cursos para esta disiplina');
     } else if (allCursos.hasOwnProperty(disiplina)) {
       if (cursoDe(cursoNuevo).disiplina == `${disiplina}` && !idIsRepeat(allCursos[disiplina], cursoNuevo.id)) {
-
-        pool.query(`INSERT INTO ${disiplina} (titulo,${cursoDe(cursoNuevo).disiplina == 'matematicas'? 'tema': 'lenguaje'},vistas, nivel) VALUES 
-        ('${req.body.titulo}', '${cursoDe(cursoNuevo).disiplina == 'matematicas'? req.body.tema: req.body.lenguaje}', '${req.body.vistas}', '${req.body.nivel}')`);
+        postCurso(disiplina, cursoNuevo);
         allCursos = await getAllCursos();
-        return res.json(allCursos[disiplina]);
-      
+        return res.status(201).json({
+          meta: {
+            endPoint: getUrl(req),
+            message: 'Curso agregado',
+          },
+          data: allCursos[disiplina],
+
+        });
+
       } else {
-        return res.status(404).send('el curso que sea agregar no coincide con la disiplina o tiene un id repetido');
+        return res.status(404).json({
+          meta: {
+            status: 404,
+            message: 'el curso que sea agregar no coincide con la disiplina o tiene un id repetido',
+          },
+        });
       }
     }
 
@@ -138,25 +203,27 @@ export const adminCursosController = {
       indice = allCursos[disiplina].findIndex(curso => curso.id == id);
     }
     if (indice >= 0) {
-      if(cursoActualizado.hasOwnProperty('tema')){
-        pool.query(`UPDATE ${disiplina} SET titulo= '${cursoActualizado.titulo}', tema= '${cursoActualizado.tema}', vistas= '${cursoActualizado.vistas}', nivel= '${cursoActualizado.nivel}' WHERE id = ${indice + 1}`);
-        allCursos = await getAllCursos();
-        return res.json(allCursos[disiplina]);
-      }else if(cursoActualizado.hasOwnProperty('lenguaje')){
-        pool.query(`UPDATE ${disiplina} SET titulo= '${cursoActualizado.titulo}', lenguaje= '${cursoActualizado.lenguaje}', vistas= '${cursoActualizado.vistas}', nivel= '${cursoActualizado.nivel}' WHERE id = ${indice + 1}`);
-        allCursos = await getAllCursos();
-        return res.json(allCursos[disiplina]);
-      }
-      
+
+      putCurso(disiplina, indice, cursoActualizado);
+      allCursos = await getAllCursos();
+      return res.status(201).json({
+        meta: {
+          message: 'Curso actualizado',
+        
+        },
+        data: allCursos[disiplina]  
+      });
 
     } else {
-      
-      return res.status(404).send('el curso que desea editar no esta en nuestra base de datos');
+
+      return res.status(404).json({
+        message: 'el curso que desea editar no esta en nuestra base de datos',
+      });
     };
   },
-  patchCurso: async (req, res) => {
+  patchUpdateCurso: async (req, res) => {
     const infoActualizada = req.body;
-    const disiplina = req.params.disiplina  
+    const disiplina = req.params.disiplina
     const id = req.params.id;
     let allCursos = await getAllCursos();
     let indice;
@@ -168,20 +235,21 @@ export const adminCursosController = {
     }
     if (indice >= 0) {
       const cursoAModificar = allCursos[disiplina][indice];
-      
+
       Object.assign(cursoAModificar, infoActualizada);
-      if(cursoAModificar.hasOwnProperty('tema')){
-        pool.query(`UPDATE ${disiplina} SET id=${cursoAModificar.id}, titulo= '${cursoAModificar.titulo}', tema= '${cursoAModificar.tema}', vistas= '${cursoAModificar.vistas}', nivel= '${cursoAModificar.nivel}' WHERE id = ${id}`);
-        allCursos = await getAllCursos();
-        return res.json(allCursos[disiplina]);
-      } else if(cursoAModificar.hasOwnProperty('lenguaje')) {
-        pool.query(`UPDATE ${disiplina} SET id=${cursoAModificar.id}, titulo= '${cursoAModificar.titulo}', lenguaje= '${cursoAModificar.lenguaje}', vistas= '${cursoAModificar.vistas}', nivel= '${cursoAModificar.nivel}' WHERE id = ${id}`);
-        allCursos = await getAllCursos();
-        return res.json(allCursos[disiplina]);
-      }
+      patchCurso(disiplina, id, cursoAModificar);
+        return res.status(201).json({
+          meta: {
+            message: 'curso modificado',
+          },
+          data: allCursos[disiplina],
+        });
       
+
     } else {
-      return res.status(404).send('el curso que desea editar no esta en nuestra base de datos');
+      return res.status(404).json({
+        message: 'el curso que desea editar no esta en nuestra base de datos',
+      });
     };
   },
 
@@ -194,9 +262,14 @@ export const adminCursosController = {
     if (indice >= 0) {
       pool.query(`DELETE FROM ${disiplina} WHERE id = ${id}`);
       allCursos = await getAllCursos();
-      return res.json(allCursos[disiplina]);
+      return res.json({
+        message: 'curso eliminado',
+        data: allCursos[disiplina],
+      });
     } else {
-      return res.status(404).send(`no se han encontrado cursos de ${disiplina} con el id: ${id}`)
+      return res.status(404).json({
+        message: `no se han encontrado cursos de ${disiplina} con el id: ${id}`,
+      })
     };
 
 
@@ -204,11 +277,11 @@ export const adminCursosController = {
 
   search: async (req, res) => {
     const nameSearch = req.query.name;
-    
+
     let getCursos = await pool.query(`SELECT *  FROM matematicas
       UNION SELECT * FROM programacion`);
     let allCursos = getCursos[0];
-     
+
     if (searchForName(allCursos, nameSearch).length > 0) {
 
       return res.json(searchForName(allCursos, nameSearch))

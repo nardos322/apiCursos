@@ -1,4 +1,4 @@
-POST http://localhost:3000/api/admin/cursos/programacion HTTP/1.1
+POST http://localhost:3000/api/cursos/programacion HTTP/1.1
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3000/api/admin/cursos/matematicas HTTP/1.1
+POST http://localhost:3000/api/cursos/matematicas HTTP/1.1
 Content-Type: application/json
 
 {
@@ -24,7 +24,7 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:3000/api/admin/cursos/programacion/1 HTTP/1.1
+PUT http://localhost:3000/api/cursos/programacion/1 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -36,7 +36,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/api/admin/cursos/matematicas/2 HTTP/1.1
+PUT http://localhost:3000/api/cursos/matematicas/2 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -49,16 +49,16 @@ Content-Type: application/json
 
 
 ###
-PATCH http://localhost:3000/api/admin/cursos/matematicas/6 HTTP/1.1
+PATCH http://localhost:3000/api/cursos/matematicas/10 HTTP/1.1
 Content-Type: application/json
 
 {
-    "vistas": 51541
+    "vistas": 0
     
 }
 
 ###
-PATCH http://localhost:3000/api/admin/cursos/programacion/4 HTTP/1.1
+PATCH http://localhost:3000/api/cursos/programacion/4 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -67,7 +67,7 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:3000/api/admin/cursos/programacion/2 HTTP/1.1
+DELETE http://localhost:3000/api/cursos/programacion/2 HTTP/1.1
 
 ###
-DELETE http://localhost:3000/api/admin/cursos/matematicas/3 HTTP/1.1
+DELETE http://localhost:3000/api/cursos/matematicas/11 HTTP/1.1

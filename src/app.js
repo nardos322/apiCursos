@@ -1,13 +1,15 @@
 import express from 'express';
-import { adminCursosRouter } from './routes/adminCursosRouter.js';
+import { cursosRouter } from './routes/cursosRouter.js';
+import { usersRouter } from './routes/usersRouter.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-// routers
-app.use('/api/admin/cursos', adminCursosRouter);
-
 app.use(express.json());
+
+// routers
+app.use('/api/cursos', cursosRouter);
+app.use('/api/users', usersRouter);
 
 
 // routing
@@ -16,8 +18,9 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/api/admin', (req, res) => {
-    res.send('Bienvenido a la ruta de administrador')
+    res.send('Bienvenido a la ruta de administrador');
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server running http://localhost:${PORT}`);
