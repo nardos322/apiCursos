@@ -18,10 +18,10 @@ cursosRouter.get('/:disiplina/:curso/:nivel?', cursosController.getListCurso);
 
 cursosRouter.post('/:disiplina', verifyTokekAdmin, cursosController.postAddCurso);
 
-cursosRouter.put('/:disiplina/:id', verifyTokekAdmin, cursosController.putUpdateCurso);
+cursosRouter.put('/:disiplina/id/:id', verifyTokekAdmin, cursosController.putUpdateCurso);
 
-cursosRouter.patch('/:disiplina/:id', verifyTokekAdmin, cursosController.patchUpdateCurso);
+cursosRouter.patch('/:disiplina/id/:id', verifyTokekAdmin, cursosController.patchUpdateCurso);
 
-cursosRouter.delete('/:disiplina/:id',verifyTokekAdmin, cursosController.deleteCurso);
+cursosRouter.delete('/:disiplina/id/:id',verifyTokekAdmin, cursosController.deleteCurso);
 
 export { cursosRouter };

@@ -125,7 +125,7 @@ export const cursosController = {
       });
 
     } else if (results.length == 0) {
-      console.log('hola')
+      
       return res.status(404).json({
         meta: {
           status: 404,

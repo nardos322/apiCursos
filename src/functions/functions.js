@@ -25,7 +25,7 @@ export const cursoDe = (curso) => {
 export const searchForName = (allCursos, nameSearch) => {
     
     let results = []
-    console.log(allCursos[1].titulo.toLowerCase().includes(nameSearch))
+    
     for(let i = 0; i < allCursos.length; i++){
        
         if(allCursos[i].titulo.toLowerCase().includes(nameSearch)){

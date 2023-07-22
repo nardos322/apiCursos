@@ -15,6 +15,7 @@ export const verifyToken = (req, res, next) => {
 
         next();
     } catch (err) {
+        console.log(token)
         return res.status(404).json({
             message: 'token invalido'
         })
