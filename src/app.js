@@ -1,5 +1,5 @@
 import express from 'express';
-import { cursosRouter } from './routes/cursosRouter.js';
+import { adminRouter } from './routes/adminRouter.js';
 import { usersRouter } from './routes/usersRouter.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // routers
-app.use('/api/cursos', cursosRouter);
+app.use('/api/admin/cursos', adminRouter);
 app.use('/api/users', usersRouter);
 
 

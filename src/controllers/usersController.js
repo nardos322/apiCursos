@@ -24,7 +24,7 @@ export const usersController = {
         
         await pool.query(`INSERT INTO users VALUES (
             default, 
-            '${user.name}', 
+        '${user.name}', 
             '${user.lastname}',
             '${bcrypt.hashSync(user.password, 10)}',
             '${user.email}',
